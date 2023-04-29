@@ -30,7 +30,7 @@ type LayerService interface {
 	//DeleteLayer delete geoserver layer and its reources else return error
 	DeleteLayer(workspaceName string, layerName string, recurse bool) (deleted bool, err error)
 
-	PublishPostgisLayer(workspaceName string, datastoreName string, publishName string, tableName string) (published bool, err error)
+	PublishPostgisLayer(workspaceName string, datastoreName string, publishName string, tableName string, title string) (published bool, err error)
 
 	PublishGeoTiffLayer(workspaceName string, coveragestoreName string, publishName string, fileName string) (published bool, err error)
 }
@@ -210,13 +210,13 @@ func (g *GeoServer) UpdateLayer(workspaceName string, layerName string, layer La
 }
 
 //PublishPostgisLayer publish postgis table to geoserver
-func (g *GeoServer) PublishPostgisLayer(workspaceName string, datastoreName string, publishName string, tableName string) (published bool, err error) {
+func (g *GeoServer) PublishPostgisLayer(workspaceName string, datastoreName string, publishName string, tableName string, title string) (published bool, err error) {
 	if workspaceName != "" {
 		workspaceName = fmt.Sprintf("workspaces/%s/", workspaceName)
 	}
 	targetURL := g.ParseURL("rest", workspaceName, "datastores", datastoreName, "/featuretypes")
 	data := PublishPostgisLayerRequest{FeatureType: &FeatureType{Name: publishName,
-		NativeName: tableName}}
+		NativeName: tableName, Title: title}}
 
 	serializedLayer, _ := g.SerializeStruct(data)
 	g.logger.Errorf("%s", serializedLayer)
