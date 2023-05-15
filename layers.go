@@ -210,13 +210,21 @@ func (g *GeoServer) UpdateLayer(workspaceName string, layerName string, layer La
 }
 
 //PublishPostgisLayer publish postgis table to geoserver
-func (g *GeoServer) PublishPostgisLayer(workspaceName string, datastoreName string, publishName string, tableName string, title string) (published bool, err error) {
+func (g *GeoServer) PublishPostgisLayer(workspaceName string, datastoreName string, publishName string, tableName string, title string, boundingBox *BoundingBox, proj *CRSType) (published bool, err error) {
 	if workspaceName != "" {
 		workspaceName = fmt.Sprintf("workspaces/%s/", workspaceName)
 	}
 	targetURL := g.ParseURL("rest", workspaceName, "datastores", datastoreName, "/featuretypes")
+	nativeBoundingBox := NativeBoundingBox{
+		BoundingBox: *boundingBox,
+		Crs:         proj,
+	}
+	latLonBoundingBox := LatLonBoundingBox{
+		BoundingBox: *boundingBox,
+		Crs:         proj,
+	}
 	data := PublishPostgisLayerRequest{FeatureType: &FeatureType{Name: publishName,
-		NativeName: tableName, Title: title}}
+		NativeName: tableName, Title: title, NativeBoundingBox: &nativeBoundingBox, LatLonBoundingBox: &latLonBoundingBox}}
 
 	serializedLayer, _ := g.SerializeStruct(data)
 	g.logger.Errorf("%s", serializedLayer)
